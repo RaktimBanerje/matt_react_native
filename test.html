@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./assets/css/commom.css" />
+    <link rel="stylesheet" href="./assets/css/header.css" />
+    <link rel="stylesheet" href="./assets/css/order-tiles.css" />
+    <link rel="stylesheet" href="./assets/css/loader.css" />
+    <link rel="stylesheet" href="./assets/css/slides.css" />
+    <script src="https://unpkg.com/realm-web/dist/bundle.iife.js"></script>
+    <title>Imreke-KMS</title>
+</head>
+<body>
+<div id="screen-overlay-transparent"></div>
+<div
+        class="cn-app-nolic-panel-container"
+        id="cn-app-nolic-panel-container"
+>
+    <div class="cn-app settings-panel-all-elems">
+        <div class="cn-app-nolic-panel-header-container">
+            <div class="cn-app-nolic-panel-header-label">WELCOME TO IMREKE MDS</div>
+        </div>
+        <div class="cn-app-nolic-panel-title-info-container">
+            <div class="cn-app-nolic-panel-title-label">
+                There is currently no license installed on this terminal!
+            </div>
+        </div>
+        <div class="cn-app-nolic-panel-api-login-support-panel-container">
+            <div class="cn-app-nolic-panel-api-login-container">
+                <div class="cn-login-api-key-title">Login to IMREKE POS</div>
+                <div class="cn-login-api-key-input-container">
+                    <div class="cn-login-api-key-input-title">
+                        Please enter the API key to login into the POS
+                    </div>
+                    <div class="cn-login-api-key-input-area">
+                        <input type="text" id="email-login" placeholder="Email Address" value="imreke_dev-eqocv+LOC1@imreke.com.au"/></br></br>
+                        <input type="text" id="password-login" placeholder="Password" value="3YQ9eyCYVQ6KbjH" />
+
+                    </div>
+                </div>
+                <div class="cn-login-api-key-footer-container">
+
+                    <div
+                            class="cn-login-api-key-footer-login-btn"
+                            onclick="insertApiTodb();"
+                    >
+                        Login
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cn-app-nolic-panel-close-btn-container"></div>
+    </div>
+</div>
+
+<div class="bg-container" id="bgContainer">
+    <div class="loader-container">
+        <div class="lds-ring">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+    <div class="internet-status">
+        <div class="internet-offline">No Internet</div>
+    </div>
+</div>
+<input type="hidden" disabled id="apikey" />
+<input type="hidden" disabled id="partval" value="LOC1" />
+<!-- <audio id="myAudio">
+  <source src="neworder.mp3" type="audio/mpeg" />
+  Your browser does not support the audio element.
+</audio> -->
+<script src="cordova.js"></script>
+<script src="./lib/jquery/dist/jquery.js"></script>
+
+
+<script>
+    //REQUIRES
+
+
+      function downloadImage(url, filepath) {
+        console.log({file})
+        fetch(url)
+        .then(response => response.json())
+        .then(response => console.log(response.blob()))
+      }
+
+      //ON DOCUMENT READY
+      $(document).ready(function () {
+        getOrderListLength();
+      });
+
+      //INTERNET CHECK
+      let isInternetConnected;
+      internetCheckCallback();
+      function internetCheckCallback() {
+        // checkInternet(function (isConnected) {
+        //   if (isConnected) {
+        //     $(".internet-status").css({ display: "none" });
+        //     isInternetConnected = isConnected;
+        //     console.log("connected");
+        //   } else {
+        //     $(".internet-status").css({ display: "block" });
+        //     isInternetConnected = isConnected;
+        //     console.log("not connected");
+        //   }
+        // });
+      }
+
+      setInterval(() => {
+        internetCheckCallback();
+      }, 5000);
+
+      // function checkInternet(cb) {
+      //   require("dns").lookup("google.com", function (err) {
+      //     if (err && err.code == "ENOTFOUND") {
+      //       cb(false);
+      //     } else {
+      //       cb(true);
+      //     }
+      //   });
+      // }
+
+      //SLIDES INIT
+      function initSlides() {
+        startSlides();
+        $(".loader-container").css({ display: "none" });
+      }
+      //SLIDESHOW
+
+      function startSlides() {
+        const directoryPath = "./galleryimages";
+        var jsonString = localStorage.getItem("slider_data");
+        obj = JSON.parse(jsonString);
+        obj.forEach(function (arrayItem) {
+          $("#bgContainer").append(
+            `<div class="mySlides fade" data-delay="${arrayItem.slider_image_delays}000">
+                <img src=${directoryPath}/${arrayItem.slider_image_urls} /></div>`
+          );
+        });
+        console.log("imgs added");
+        showSlides();
+      }
+      let slideIndex = 0;
+
+      function showSlides() {
+        let i;
+        let slides = document.getElementsByClassName("mySlides");
+        for (i = 0; i < slides.length; i++) {
+          slides[i].style.display = "none";
+        }
+        slideIndex++;
+        if (slideIndex > slides.length) {
+          slideIndex = 1;
+        }
+        slides[slideIndex - 1].style.display = "block";
+        var slidedelays = slides[slideIndex - 1].getAttribute("data-delay");
+      //  console.log(slidedelays);
+        setTimeout(showSlides, slidedelays);
+      }
+
+
+      function insertApiTodb() {
+
+          const emailAddress = $("#email-login").val();
+          const passwordDetails = $("#password-login").val();
+          const keyvalue = emailAddress.substring(0, emailAddress.indexOf("@"));
+          localStorage.setItem("login_email", emailAddress);
+          localStorage.setItem("login_email", emailAddress);
+          localStorage.setItem("login_db", keyvalue.split('+')[0]);
+          localStorage.setItem("login_locid", keyvalue.split('+')[1]);
+          localStorage.setItem("login_password", passwordDetails);
+          setTimeout(() => {
+        handleLogin();
+        }, 4000);
+
+        }
+
+      var email = localStorage.getItem("login_email");
+
+      if (!email) {
+        document.getElementById("screen-overlay-transparent").style.display =
+          "block";
+        document.getElementById("cn-app-nolic-panel-container").style.display =
+          "flex";
+      } else {
+          handleLogin();
+      }
+
+      async function handleLogin() {
+        const apprealm = new Realm.App({ id: localStorage.getItem("login_db") });
+        const {currentUser} = apprealm;
+        const credentials = Realm.Credentials.emailPassword(localStorage.getItem("login_email"), localStorage.getItem("login_password"));
+        try {
+          const user = await apprealm.logIn(credentials);
+              console.assert(user.id === apprealm.currentUser.id);
+          console.log("Successfully logged in!", user.id);
+          document.getElementById("screen-overlay-transparent").style.display =
+            "none";
+          document.getElementById("cn-app-nolic-panel-container").style.display =
+            "none";
+
+          return user;
+
+          getOrderListLength();
+
+        } catch (err) {
+          document.getElementById("screen-overlay-transparent").style.display =
+            "block";
+          document.getElementById("cn-app-nolic-panel-container").style.display =
+            "flex";
+          console.error("Failed to log in", err.message);
+        }
+      }
+
+      async function getOrderListLength() {
+        const MDSSchema = {
+          name: "menu_board_layouts",
+          properties: {
+            _id: "objectId",
+            boardid: "string",
+            slider_image_urls: "string",
+            slider_image_delays: "string"
+          },
+          primaryKey: "_id",
+        };
+
+        const apprealm = new Realm.App({ id: localStorage.getItem("login_db") });
+        const {currentUser} = apprealm;
+            console.log(currentUser);
+            const OpenRealmBehaviorConfiguration = {
+              type: "openImmediately",
+            };
+
+
+
+          let realmmds = await Realm.open({
+            schema: [MDSSchema],
+            path: "menu_board_layouts.realm",
+            sync: {
+              user: currentUser,
+              partitionValue: "",
+              newRealmFileBehavior: OpenRealmBehaviorConfiguration,
+              existingRealmFileBehavior: OpenRealmBehaviorConfiguration,
+            }
+          })
+
+
+
+        var sear = "1";
+        const mdsdata = realmmds.objects("menu_board_layouts");
+        const mdsfildata = mdsdata.filtered('boardid == "' + sear + '"');
+        console.log(`Number of MDS objects: ${mdsfildata.length}`);
+
+        if (mdsfildata.length == 0){
+          setTimeout(() => {
+        handleLogin();
+        }, 4000);
+
+      }else{
+        const mdsfilslidedata = mdsfildata;
+        //alert(JSON.stringify(mdsfilslidedata));
+        var a = [];
+        var i,
+          x = "";
+
+        for (i in mdsfilslidedata) {
+          a.push({
+            slider_image_urls: `${mdsfilslidedata[i].slider_image_urls}`,
+            slider_image_delays: `${mdsfilslidedata[i].slider_image_delays}`,
+          });
+        }
+        console.log(JSON.stringify(a));
+        localStorage.setItem("slider_data", JSON.stringify(a));
+
+        mdsfildata.addListener(function (collection, changes) {
+          console.log(changes.insertions);
+          console.log(changes.modifications.length);
+          console.log(changes.oldModifications);
+          console.log(changes.newModifications.length);
+          console.log(changes.deletions);
+
+          if (changes.newModifications.length == "1") {
+            getOrderListLength();
+          }
+          if (changes.newModifications.length == "0") {
+            $(".mySlides").remove();
+            $(".loader-container").css({ display: "block" });
+
+            if (isInternetConnected) {
+              let i;
+              var getUrl = localStorage.getItem("slider_data");
+              obj = JSON.parse(getUrl);
+            //  alert(obj.length);
+              for (i = 0; i < obj.length; i++) {
+              //  alert();
+                downloadImage('https://appdevnew.imreke.com.au/uploads/board/'+mdsfilslidedata[i].slider_image_urls, '../../galleryimages/'+mdsfilslidedata[i].slider_image_urls)
+                    .then(console.log)
+                    .catch(console.error);
+              }
+              if (i == obj.length){
+                console.log("slides_downloaded");
+                localStorage.setItem("slides_downloaded", true);
+                setTimeout(() => {
+                  initSlides();
+                }, 10000);
+              }
+            } else {
+              initSlides();
+            }
+          }
+        });
+      }
+    }
+
+    </script>
+</body>
+</html>
