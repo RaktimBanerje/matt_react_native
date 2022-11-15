@@ -43,10 +43,13 @@ const App = () => {
         } catch (err) {
           console.error("Failed to log in", err.message);
           if(err.message == "Network request failed" || err.message == "Aborted") {
+            setLoading(false)
+            setShowForm(false)
             setIsConnected(false)
             getOrderListLength()
-          }
+          }else {
           throw new Error("Failed to log in")
+          }
         }
     }
 
@@ -213,7 +216,7 @@ const App = () => {
               await timeout(Number(slides[i].slider_image_delays) * 1000)  
 
               if(i == (slides.length - 1)) {
-                i = 0
+                i = -1
               }
             }
         })
@@ -254,7 +257,7 @@ const App = () => {
     React.useEffect(() => {
 
       if(emailAddress && passwordDetails) {
-        keyvalue = emailAddress.substring(0, emailAddress.indexOf("@"))
+        const keyvalue = emailAddress.substring(0, emailAddress.indexOf("@"))
         setKeyValue(keyvalue)
         setLoginEmail(emailAddress)
         setLoginDb(keyvalue.split('+')[0])
